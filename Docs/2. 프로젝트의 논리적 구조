@@ -1,0 +1,112 @@
+2 프로젝트 설계
+
+이 문서는 프로젝트를 설계할때 생각했던 방식을 기술한 문서입니다.
+
+
+2.1 프로젝트의 논리적 구조
+
+본 프로젝트는 C# 채팅 서버 입니다.
+크게 4가지 부분으로 나눠볼수 있는데, 다음과 같슴니다.
+
+    - 진입점인 Session 기반 TCP 통신
+    - Room 방식의 채팅 서버
+    - 유저의 명령어를 논리적 처리하는 Command Handler
+    - 유저의 명령어를 기능적 처리하는 Message Dispatcher
+
+
+유저가 Room에 접속해서 메시지를 보내는 시나리오를 가정했을때의
+코드 실행 순서는 다음과 같습니다.
+
+    - Program.cs 파일의 new ChatServerHost();를 통해 서버 객체가 생성됩니다.
+    - 통신이 되면 유저는 new Session(client);을 통해 Session 객체로 생성되고, 기본 방인 0번에 입장하게 됩니다.
+    - 서버는 Session.cs 파일의 HandleAsync의 while 루프를 돌리며 유저의 메시지를 기다립니다.
+    - 유저의 메시지가 전송되면, HandleAsync에서 Packet으로 파싱되어, Dispatcher의 메시지 큐에 Enqueue.WriteAsync를 통해 적재됩니다.
+    - MessageDispatcher.cs에서 메시지 큐에 적제된 메시지를 ProcessQueueAsync에서 메시지가 적절한지 검사합니다.
+    - 메시지를 보낼 수 있다면, 메시지를 처리하는 Execute를 실행하게 됩니다.
+    - Execute는 CommandRegistry.cs 파일의 함수인데, Packet의 헤더(Packet.Type)에 맞는 함수를 실행합니다.
+    - CommandHandler에서 적절한 함수가 실행되어, 방 옮기기, 메시지 보내기, 귓속말 등의 기능을 수행합니다.
+
+
+
+2.2 각 파일을 기능별로 정리하면 다음과 같습니다.
+
+    1. Program.cs
+
+    - 서버의 시작점(Entry Point) 입니다.
+    - 서버를 초기화하고, RunAsync를 통해 서버를 실행합니다. 
+
+
+    2. Session.cs
+
+    - 유저를 패키징하는 Session Class 입니다.
+    - 유저의 이름, 방번호, 최근 채팅 시간 등을 관리합니다.
+    - 유저의 메시지를 파싱하여 Packet으로 패키징하고, Dispatcher Que에 적재합니다.
+
+
+
+    3. Setting 폴더
+
+    서버에 필요한 상수를 정의해 놓은 폴더입니다.
+
+        appsetting.json
+            - 서버에서 필요한 setting 상수를 정의한 파일입니다.
+
+
+    4. Network 폴더
+
+    네트워크에 관련된 파일을 모아놓는 폴더입니다.
+
+        Packet.cs 
+            - 유저의 커맨드를 효율적으로 처리하기 위한 코드입니다.
+            - 임의의 Header와 Payload를 정의합니다.
+
+        ChatServerHost.cs
+            - 설정을 초기화 하고, TCP 통신을 열어 유저가 접속하였을때 이를 Session으로 패키징 하는 역할을 합니다.
+
+    5. Room 폴더
+
+    유저가 접속하는 Room에 관련된 파일을 모아놓는 폴더입니다.
+    유저는 Room 별로 관리됩니다.
+
+        IRoomManager.cs
+            - RoomManager에서 사용하는 함수의 인터페이스 정의 입니다.
+
+        RoomManager.cs
+            - Room을 관리하는데 필요한 명령어를 모아놓는 파일입니다.
+            - 방 옮기기, 방 나가기, 방 제거, 유저 찾기 등의 기능을 수행합니다.
+
+        Room.cs
+            - Room을 만들고, 관리하는 파일입니다.
+
+
+    6. Dispatcher 폴더
+
+    서버에 들어온 메시지를 처리하는 프론트 컨트롤러입니다.
+
+        IMessageDispatcher.cs
+            - MessageDispatcher에서 사용하는 함수의 인터페이스 정의 입니다.
+
+
+        MessageDispatcher.cs
+            - 수신된 메시지의 유효성을 검사하고, 실제 실행 로직으로 전달하는 역할을 합니다.
+            - 생성자에서 지정한 워커 개수만큼 병렬 Task(워커)를 생성해 큐를 처리합니다.
+            
+
+    7. Command 폴더
+
+    유저의 메시지를 처리하기 위한 파일을 모아놓는 폴더입니다.
+
+        ICommandHandler.cs
+            - CommmandHandler.cs에서 사용하는 함수의 인터페이스 정의 입니다.
+
+        CommmandHandler.cs
+            - 유저의 명령어를 처리하는 코드입니다.
+            - 대화, 귓속말, 방옮기기 등의 여러 명령어를 처리합니다.
+
+        CommandRegistry.cs
+            - 서버가 시작할때 명령어를 자동으로 등록합니다.
+            - MessageDispatcher에서 들어온 Packet을 분석해, 알맞는 CommandHandler로 연결시키는 역할을 합니다.
+
+        CommandTable.cs
+            - 서버에서 사용하는 명령어의 모음입니다.
+            - CommandTable의 코드들이 CommandRegistry에서 서버가 시작할때 자동 등록이 됩니다.

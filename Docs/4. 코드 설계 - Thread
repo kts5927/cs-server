@@ -1,0 +1,32 @@
+4. 코드 설계 - Thread
+
+Q. Dispatcher 워커풀(worker pool)을 만든 이유는?
+
+결론적으로 메시지큐 시스템을 활용하여 병목현상을 줄이고, 
+확장하기 편한 구조를 만들고 싶었습니다.
+그리고 다른문장으로는 다음과 같습니다.
+
+1. Dispatcher/Worker 스레드와 TCP스레드를 분리하기 위해
+2. Dispatcher 스레드의 작업량을 줄이기 위해
+
+첫번째 이유를 좀 더 설명하면
+저는 TCP/Dispatcher/Worker 스레드를 나누고 싶었습니다.
+그래야 각 기능별로 명확하게 할일을 가지게 되고, 
+이후 병목현상을 진단할떄도 용이하고, 추후 로드밸런싱 등의
+분산시스템을 도입할때도 서버를 여러개 만든 후
+TCP에서 받아온 메시지를 Dispatcher에 흩뿌리는것으로 로드밸런싱이 가능해집니다.
+
+두번째 이유를 좀 더 설명하면
+Dispatcher 스레드는 단순히 메시지큐 작업만을 담당합니다.
+따라서 Dispatcher에 연산량이 늘어나면, TCP/워커 스레드가
+Dispatcher에서 처리하지못해 병목현상이 발생하고 맙니다.
+
+하지만 MessageDispatcher 코드에서는 Dispatcher/Worker 스레드를 나누지 않았습니다.
+왜냐하면 .NET의 Channel의 스레드풀 구조는 제가 아는 정보로
+ThreadPool은 하나이고, ThreadPool을 나누기 위해서 커스텀 TaskScheduler를 작성해야 합니다.
+이 과정에서 서버의 코드가 과도하게 복잡해지고, 현재 규모에서는 Dispatcher와 Worker를 같이 처리해도
+서버의 성능에 미치는 영향이 적습니다.(Worker 로직이 간소함)
+따라서 이후 서버를 크게 확장할때
+Dispatcher 서버와 Worker 서버를 따로 만들어서
+각각 독립된 Channel을 가지는것이 좋다는 판단을 하였습니다.
+

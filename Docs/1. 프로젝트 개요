@@ -1,0 +1,45 @@
+1 프로젝트 개요
+
+본 Docs는 멀티스레드 채널 기반 C# 채팅 서버를 개발한 결과물을 정리하여, 
+기능과 설계 내용을 정리하기위한 목적으로 작성되었습니다.
+
+
+1.1 프로젝트의 목적
+
+    - C#/.NET 기반으로 Room 단위 채팅기능을 제공하는 서버를 구현
+    - 멀티스레드처리, 비동기 I/O, OOP 설계 등 핵심기술을 적용하여 안정적인 동작환경 구현
+
+
+1.2 주요 기능
+
+    - TCP 소켓 기반 클라이언트 연결 및 세션 관리 - Program.cs 파일
+    - 채팅에 쓰이는 다양한 명령어 처리 - Command 폴더
+    - 메시지큐(Channel), 워커(Task)를 통한 병렬처리
+    - 세션별 과부화 방지 기능(쿨다운)
+    - Graceful Shutdown(정상종료) 로직
+
+
+1.3 파일 구조
+
+cs-server
+├─ Program.cs
+├─ csharp-server.csproj
+└─ server
+    ├─ Session.cs
+    ├─ Setting
+    │   └─ appsettings.json
+    ├─ Network
+    │   ├─ Packet.cs
+    │   └─ ChatServerHost.cs
+    └─ Server
+        ├─ Command
+        │   ├─ ICommandHandler.cs
+        │   ├─ CommandHandler.cs
+        │   ├─ CommandRegistry.cs
+        │   └─ CommandTable.cs
+        ├─ Dispatcher
+        │   └─ MessageDispatcher.cs
+        └─ Room
+            ├─ Room.cs
+            ├─ IRoomManager.cs
+            └─ RoomManager.cs

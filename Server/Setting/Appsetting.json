@@ -1,0 +1,14 @@
+{
+    "Server": {
+      "Port": 7777,
+      "WorkerCount": 4,
+      "CooldownMs": 1000
+    },
+    "Logging": {
+      "MinimumLevel": "Information",
+      "WriteTo": [
+        { "Name": "Console" }
+      ]
+    }
+}
+  
