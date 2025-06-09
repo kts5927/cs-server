@@ -20,9 +20,9 @@ C# 서버 실습 프로젝트입니다.
 
 개발자 호스트 서버 스팩
 
-Hardware - Apple Mac M2 Air
-.NET Version - 9.0.300
-C# Version - VS Code Extension C# v2.50.27(Microsoft)
+- Hardware - Apple Mac M2 Air
+- .NET Version - 9.0.300
+- C# Version - VS Code Extension C# v2.50.27(Microsoft)
 
 
 서버 패키지 참고
