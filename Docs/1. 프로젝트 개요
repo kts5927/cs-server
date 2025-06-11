@@ -24,10 +24,9 @@
 cs-server
 ├─ Program.cs
 ├─ csharp-server.csproj
+├─ appsettings.json
 └─ server
     ├─ Session.cs
-    ├─ Setting
-    │   └─ appsettings.json
     ├─ Network
     │   ├─ Packet.cs
     │   └─ ChatServerHost.cs
