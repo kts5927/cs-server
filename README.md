@@ -30,10 +30,10 @@ C# 서버 프로젝트입니다.
 - 본 서버는 아래의 패키지를 추가하여 사용합니다.
 - 터미널에에서 아래 코드를 입력하시면 빌드에 필요한 패키지가 자동 추가됩니다.
 
-dotnet add package Serilog
-dotnet add package Serilog.Settings.Configuration
-dotnet add package Serilog.Sinks.Console
-dotnet add package Microsoft.Extensions.Configuration
+dotnet add package Serilog<br>
+dotnet add package Serilog.Settings.Configuration<br>
+dotnet add package Serilog.Sinks.Console<br>
+dotnet add package Microsoft.Extensions.Configuration<br>
 dotnet add package Microsoft.Extensions.Configuration.Json
 
 
